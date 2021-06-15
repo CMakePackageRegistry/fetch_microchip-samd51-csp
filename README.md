@@ -10,3 +10,6 @@ This CMakeFetchContent module will auto download+configure the Device-Family-Pac
 - samd51n20a
 - samd51p19a
 - samd51p20a
+
+# Dependencies
+- arm::cmsis_5
