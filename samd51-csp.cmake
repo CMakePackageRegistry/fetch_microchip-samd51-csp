@@ -38,8 +38,10 @@ set( samd51-csp_GCC_LD
 ## Add all LD files to project source for development
 set( samd51-csp_GCC_LD_SOURCES 
     ${samd51-csp_GCC_LD}
-    ${CMAKE_CURRENT_LIST_DIR}/ld/memory.ld
-    ${CMAKE_CURRENT_LIST_DIR}/ld/sections.ld
+    ${CMAKE_CURRENT_LIST_DIR}/ld/memory/common.ld
+    ${CMAKE_CURRENT_LIST_DIR}/ld/memory/${MCU}.ld
+    ${CMAKE_CURRENT_LIST_DIR}/ld/sections/common.ld
+    ${CMAKE_CURRENT_LIST_DIR}/ld/sections/${MCUFlashPartition}.ld
 )
 
 add_library(microchip-samd51-csp)
@@ -50,11 +52,8 @@ set_target_properties( microchip-samd51-csp PROPERTIES
 # TODO: doens't appear to cause rebuild as expected to :S'
 set_property(TARGET microchip-samd51-csp PROPERTY 
     INTERFACE_LINK_DEPENDS  
-    ${samd51-csp_GCC_LD}
-    ${CMAKE_CURRENT_LIST_DIR}/ld/memory.ld
-    ${CMAKE_CURRENT_LIST_DIR}/ld/sections.ld
+    ${samd51-csp_GCC_LD_SOURCES}
 )
-
 
 target_compile_definitions(microchip-samd51-csp
     PUBLIC

@@ -1,6 +1,4 @@
 
-
-
 /** @{ PARTITIONS */
 __BOOTLOADER_SIZE__ = DEFINED(__BOOTLOADER_SIZE__) ? __BOOTLOADER_SIZE__ : 6K;
 __CALDATA_SIZE__ = DEFINED(__CALDATA_SIZE__) ? __CALDATA_SIZE__ : __length_UserPage - __length_UserPageReserved;

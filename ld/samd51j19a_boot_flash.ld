@@ -1,7 +1,2 @@
-
-
-INCLUDE memory.ld
-
-REGION_ALIAS("TARGET_FLASH", BOOT_FLASH );
-
-INCLUDE sections.ld
+INCLUDE memory/samd51j19a.ld
+INCLUDE sections/boot.ld
