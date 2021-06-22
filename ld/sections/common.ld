@@ -56,13 +56,6 @@ SECTIONS
         KEEP(*(.factoryCalibrationData));
     } > USERPAGE_FLASH
 
-    
-	.crc ORIGIN(TARGET_FLASH) + 0x1C (OVERLAY) : AT ( ORIGIN(TARGET_FLASH) + 0x1C )
-	{
-		LONG( __imageSizeBytes );
-		LONG( 0x0 );
-	} > TARGET_FLASH 
-
 	.bootloader ORIGIN(BOOT_FLASH) (OVERLAY) : AT ( ORIGIN(BOOT_FLASH) )
 	{	
 		. = __origin_BootloaderVersionTag;
@@ -70,10 +63,11 @@ SECTIONS
 
 		. = __BOOTLOADER_SIZE__;
 	} > BOOT_FLASH
-
- 
+     
     .text :
     {
+        FILL(0xDEADC0DE)
+
         . = ALIGN(4);
         _sfixed = .;
         KEEP(*(.vectors .vectors.*))
@@ -135,11 +129,20 @@ SECTIONS
     } > TARGET_FLASH
     PROVIDE_HIDDEN (__exidx_end = .);
 
+
     . = ALIGN(4);
     _etext = .;
+          
+	.crc ORIGIN(TARGET_FLASH) + 0x1C (OVERLAY) :  AT ( ORIGIN(TARGET_FLASH) + 0x1C )
+	{
+		LONG( __imageSizeBytes );
+		LONG( 0x0 );
+	} > TARGET_FLASH
 
     .relocate : AT (_etext)
     {
+        FILL(0xDEADBEEF)
+
         . = ALIGN(4);
         _srelocate = .;
         *(.ramfunc .ramfunc.*);
@@ -213,9 +216,10 @@ SECTIONS
     _end = . ;
 
 	/* Image size of flashed image TODO: May be a betetr way to determine this? */
-	__imageSizeBytes = SIZEOF(.text) + SIZEOF(.got) + SIZEOF(.got.plt);
+	__imageSizeBytes = (_etext - ORIGIN(TARGET_FLASH)) + SIZEOF(.relocate);
 
 }
+
 
 /** TODO: Only valid for bootloader! ASSERT( __origin_versionTag == 0x24 + ORIGIN(TARGET_FLASH), "VersionTag address moved" )*/
 ASSERT( __origin_CALDATA_FLASH == 0x804020, "Factory Calibration Data address moved" )
