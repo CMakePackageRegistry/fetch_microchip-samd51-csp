@@ -95,12 +95,18 @@ target_link_options( microchip-samd51-csp  PUBLIC
 # TODO: What is -MMD ?
 target_compile_options( microchip-samd51-csp 
     PUBLIC        
+        #-flto 
         -mthumb 
-        -Og -ffunction-sections 
+        #-mabi=aapcs
+        -mcpu=cortex-m4
+        -mfloat-abi=hard
+        -mfpu=fpv4-sp-d16
+       # -nostdlib 
+       # -nostartfiles
         $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti -fno-threadsafe-statics>   
         $<$<COMPILE_LANGUAGE:C>:-std=gnu99 -Wstrict-prototypes>
         $<$<COMPILE_LANGUAGE:ASM>:-x assembler-with-cpp>
-        -mlong-calls -g3 -Wall -mcpu=cortex-m4 -c -MD -MP -MF 
+        -mlong-calls -Wall -c -MD -MP -MF 
         -Wno-address-of-packed-member 
         -fno-diagnostics-show-caret        
         -fdata-sections -ffunction-sections
@@ -116,13 +122,20 @@ target_compile_features( microchip-samd51-csp
 target_link_options( microchip-samd51-csp  
     PUBLIC 
         -v
-	    -mthumb
-        -Wl,-z,relro,-z,now # Increase startup times but miticate Relocation attachs https://systemoverlord.com/2017/03/19/got-and-plt-for-pwning.html
+        #-flto 
+        -mthumb 
+        #-mabi=aapcs
+        -mcpu=cortex-m4
+        -mfloat-abi=hard
+        -mfpu=fpv4-sp-d16
+        #-nostdlib
+       # -nostartfiles
+       -O3
+        #-Wl,-z,relro,-z,now # Increase startup times but miticate Relocation attachs https://systemoverlord.com/2017/03/19/got-and-plt-for-pwning.html
         -Wl,--print-memory-usage,-Map=memory.map -Wl,--start-group -lm  -Wl,--end-group
         -Wl,--gc-sections,--check-sections,--unresolved-symbols=report-all
         -Wl,--warn-common,--warn-section-align
         --specs=nano.specs
-        -mcpu=cortex-m4
         -Xlinker --defsym=__BOOTPROTECT_SIZE__=8K
 )
 
