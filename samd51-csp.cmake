@@ -132,10 +132,10 @@ target_link_options( microchip-samd51-csp
        # -nostartfiles
        -O3
         #-Wl,-z,relro,-z,now # Increase startup times but miticate Relocation attachs https://systemoverlord.com/2017/03/19/got-and-plt-for-pwning.html
-        -Wl,--print-memory-usage,-Map=memory.map -Wl,--start-group -lm  -Wl,--end-group
+        -Wl,--print-memory-usage,-Map=memory.map -Wl,--start-group -lm -Wl,--end-group
         -Wl,--gc-sections,--check-sections,--unresolved-symbols=report-all
         -Wl,--warn-common,--warn-section-align
-        --specs=nano.specs
+        -specs=nosys.specs -specs=nano.specs
         -Xlinker --defsym=__BOOTPROTECT_SIZE__=8K
 )
 

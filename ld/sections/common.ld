@@ -182,6 +182,7 @@ SECTIONS
         . = ALIGN(4);
         _ebss = . ;
         _ezero = .;
+        end = .;
     } > RAM
   
     
