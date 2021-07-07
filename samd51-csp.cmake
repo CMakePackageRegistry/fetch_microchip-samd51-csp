@@ -90,54 +90,55 @@ target_link_options( microchip-samd51-csp  PUBLIC
     $<$<CXX_COMPILER_ID:GNU>:-T${samd51-csp_GCC_LD}>
 )
 
-# TODO: These options should be defined in their respetive places
+# TODO: Using |Toolchain as these settings only inheritted by dependent libraries
 # TODO: --param max-inline-insns-single=500 
 # TODO: What is -MMD ?
-target_compile_options( microchip-samd51-csp 
-    PUBLIC        
-        #-flto 
-        -mthumb 
-        #-mabi=aapcs
-        -mcpu=cortex-m4
-        -mfloat-abi=hard
-        -mfpu=fpv4-sp-d16
-       # -nostdlib 
-       # -nostartfiles
-        $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti -fno-threadsafe-statics>   
-        $<$<COMPILE_LANGUAGE:C>:-std=gnu99 -Wstrict-prototypes>
-        $<$<COMPILE_LANGUAGE:ASM>:-x assembler-with-cpp>
-        -mlong-calls -Wall -c -MD -MP -MF 
-        -Wno-address-of-packed-member 
-        -fno-diagnostics-show-caret        
-        -fdata-sections -ffunction-sections
-        -funsigned-char -funsigned-bitfields
-        -fpic
-)
+#target_compile_options( microchip-samd51-csp 
+#    INTERFACE        
+#        #-flto 
+#        -mthumb 
+#        #-mabi=aapcs
+#        -mcpu=cortex-m4
+#        -mfloat-abi=hard
+#        -mfpu=fpv4-sp-d16
+#       # -nostdlib 
+#       # -nostartfiles
+#        $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti -fno-threadsafe-statics>   
+#        $<$<COMPILE_LANGUAGE:C>:-std=gnu99 -Wstrict-prototypes>
+#        $<$<COMPILE_LANGUAGE:ASM>:-x assembler-with-cpp>
+#        -mlong-calls -Wall -c -MD -MP -MF 
+#        -Wno-address-of-packed-member 
+#        -fno-diagnostics-show-caret        
+#        -fdata-sections -ffunction-sections
+#        -funsigned-char -funsigned-bitfields
+#        -fpic
+#)
 
 target_compile_features( microchip-samd51-csp
     PUBLIC
         cxx_noexcept# TODO: We should use exceptions ideally as it is low/no cost on ARm runtime but increases binary size....
 )
 
-target_link_options( microchip-samd51-csp  
-    PUBLIC 
-        -v
-        #-flto 
-        -mthumb 
-        #-mabi=aapcs
-        -mcpu=cortex-m4
-        -mfloat-abi=hard
-        -mfpu=fpv4-sp-d16
-        #-nostdlib
-       # -nostartfiles
-       -O3
-        #-Wl,-z,relro,-z,now # Increase startup times but miticate Relocation attachs https://systemoverlord.com/2017/03/19/got-and-plt-for-pwning.html
-        -Wl,--print-memory-usage,-Map=memory.map -Wl,--start-group -lm -Wl,--end-group
-        -Wl,--gc-sections,--check-sections,--unresolved-symbols=report-all
-        -Wl,--warn-common,--warn-section-align
-        -specs=nosys.specs -specs=nano.specs
-        -Xlinker --defsym=__BOOTPROTECT_SIZE__=8K
-)
+# TODO: Using |Toolchain as these settings only inheritted by dependent libraries
+#target_link_options( microchip-samd51-csp  
+#    INTERFACE 
+#        -v
+#        #-flto 
+#        -mthumb 
+#        #-mabi=aapcs
+#        -mcpu=cortex-m4
+#        -mfloat-abi=hard
+#        -mfpu=fpv4-sp-d16
+#        #-nostdlib
+#       # -nostartfiles
+#       -O3
+#        #-Wl,-z,relro,-z,now # Increase startup times but miticate Relocation attachs https://systemoverlord.com/2017/03/19/got-and-plt-for-pwning.html
+#        -Wl,--print-memory-usage,-Map=memory.map -Wl,--start-group -lm -Wl,--end-group
+#        -Wl,--gc-sections,--check-sections,--unresolved-symbols=report-all
+#        -Wl,--warn-common,--warn-section-align
+#        -specs=nosys.specs -specs=nano.specs
+#        -Xlinker --defsym=__BOOTPROTECT_SIZE__=8K
+#)
 
 # Alias name
 add_library( microchip::samd51::csp ALIAS microchip-samd51-csp )
