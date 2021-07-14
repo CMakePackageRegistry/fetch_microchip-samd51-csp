@@ -13,6 +13,25 @@ set(CMAKE_ASM_COMPILER ${CMAKE_C_COMPILER})
 SET(CMAKE_CXX_COMPILER_TARGET ${TOOLCHAIN_TARGET})
 set(CMAKE_CXX_COMPILER ${TOOLCHAIN_TARGET}-g++)
 
+set(CMAKE_CXX_FLAGS_DEBUG_INIT "-O0 -DDEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE_INIT "-Os -DNDEBUG")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "-Os -g3 -DNDEBUG")
+
+set(CMAKE_CXX_FLAGS_DEBUG_INIT "-O0 -DDEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE_INIT "-Os -DNDEBUG")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "-Os -g3 -DNDEBUG")
+
+
+function( setLangFlagsInit lang )
+set(CMAKE_${lang}_FLAGS_DEBUG " -g -DDEBUG" CACHE STRING "")
+set(CMAKE_${lang}_FLAGS_MINSIZEREL " -Os -DNDEBUG" CACHE STRING "")
+set(CMAKE_${lang}_FLAGS_RELEASE " -O3 -DNDEBUG" CACHE STRING "")
+set(CMAKE_${lang}_FLAGS_RELWITHDEBINFO " -O2 -g -DNDEBUG" CACHE STRING "")
+endfunction()
+setLangFlagsInit("C")
+setLangFlagsInit("ASM")
+setLangFlagsInit("CXX")
+
 #set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 # Assembler flags common to all targets
@@ -22,6 +41,9 @@ set(TOOLCHAIN_DATA_FLAGS
 	-fdata-sections 
 	#-fno-strict-aliasing
 	-fshort-enums #This option tells the compiler to allocate as many bytes as needed for enumerated types.
+	"-D__ASSERT_FUNC=((char*)0)" # Remove 'function name' from assert details to reduce binary size
+	#-fmacro-prefix-map={build.path}\sketch\=  #TODO: used on Ardunino custom BSP but not needed here?
+	#-fdebug-prefix-map={build.path}\sketch={build.source.path}   #TODO: used on Ardunino custom BSP but not needed here?
 )
 set(TOOLCHAIN_WARN_FLAGS 
 	-Wall
@@ -33,24 +55,33 @@ set(TOOLCHAIN_ARCH_FLAGS
 	-mthumb
 	-mfloat-abi=hard 
 	-mfpu=fpv4-sp-d16
-	#-mabi=aapcs 
+	-mabi=aapcs 
 )
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
-SET(CMAKE_C_FLAGS -Wstrict-prototypes
+SET(CMAKE_C_FLAGS  
+	#-v
+	-Wstrict-prototypes
 	${TOOLCHAIN_ARCH_FLAGS}
 	${TOOLCHAIN_C_FLAGS} 
 	${TOOLCHAIN_COMMON_FLAGS}
 	${TOOLCHAIN_WARN_FLAGS} 
 	${TOOLCHAIN_DATA_FLAGS}
 )
-SET(CMAKE_ASM_FLAGS -x assembler-with-cpp
+SET(CMAKE_ASM_FLAGS   
+	#-v
+	-x assembler-with-cpp
 	${TOOLCHAIN_ASM_FLAGS}
 	${CMAKE_C_FLAGS} 
 )
-SET(CMAKE_CXX_FLAGS -fno-exceptions -fno-rtti -fno-threadsafe-statics
+SET(CMAKE_CXX_FLAGS  
+	#-v
+	-Wno-volatile # Erroneous warning accessing CPU Registers using `REG |= val` with "'volatile'-qualified left operand is deprecated"
+	-fno-exceptions
+	-fno-rtti 
+	-fno-threadsafe-statics
 	${TOOLCHAIN_ARCH_FLAGS} 
 	${TOOLCHAIN_CPP_FLAGS} 
 	${TOOLCHAIN_COMMON_FLAGS}
@@ -58,7 +89,7 @@ SET(CMAKE_CXX_FLAGS -fno-exceptions -fno-rtti -fno-threadsafe-statics
 	${TOOLCHAIN_DATA_FLAGS}
 )
 SET(CMAKE_EXE_LINKER_FLAGS  
-	-v
+	#-v
 	${TOOLCHAIN_ARCH_FLAGS}
 	-Wl,--print-memory-usage,-Map=memory.map -Wl,--start-group -lm -Wl,--end-group
 	-Wl,--gc-sections,--check-sections,--unresolved-symbols=report-all

@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.18) #FetchContent
 
+# TODO: Check toolchain matches this target during build etc?
+message(STATUS "Using toolchain file: ${CMAKE_TOOLCHAIN_FILE}")
+
 # Only supported for target cross-compiled build
 if ( NOT CMAKE_CROSSCOMPILING )
     return()
