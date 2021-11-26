@@ -50,8 +50,10 @@ SECTIONS
     } > HWDATA_FLASH
     
     .userPage (NOLOAD):
-    {
-        KEEP(*(.userPageReserved));   
+    {        
+        KEEP(*(.userPageReserved)); 
+        . = __length_UserPageReserved - 4;
+        KEEP(*(.hardwareVersion)); 
         . = __length_UserPageReserved;
         KEEP(*(.factoryCalibrationData));
     } > USERPAGE_FLASH
