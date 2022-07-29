@@ -41,7 +41,7 @@ set(TOOLCHAIN_DATA_FLAGS
 	-fdata-sections 
 	#-fno-strict-aliasing
 	-fshort-enums #This option tells the compiler to allocate as many bytes as needed for enumerated types.
-	"-D__ASSERT_FUNC=((char*)0)" # Remove 'function name' from assert details to reduce binary size
+	#"-D__ASSERT_FUNC=((char*)0)" # Remove 'function name' from assert details to reduce binary size
 	#-fmacro-prefix-map={build.path}\sketch\=  #TODO: used on Ardunino custom BSP but not needed here?
 	#-fdebug-prefix-map={build.path}\sketch={build.source.path}   #TODO: used on Ardunino custom BSP but not needed here?
 )
