@@ -13,6 +13,13 @@ set(CMAKE_ASM_COMPILER ${CMAKE_C_COMPILER})
 SET(CMAKE_CXX_COMPILER_TARGET ${TOOLCHAIN_TARGET})
 set(CMAKE_CXX_COMPILER ${TOOLCHAIN_TARGET}-g++)
 
+set(CMAKE_OBJCOPY ${TOOLCHAIN_TARGET}-objcopy)
+set(CMAKE_OBJDUMP ${TOOLCHAIN_TARGET}-objdump)
+set(CMAKE_RANLIB ${TOOLCHAIN_TARGET}-ranlib)
+set(CMAKE_READELF ${TOOLCHAIN_TARGET}-readelf)
+set(CMAKE_SIZE ${TOOLCHAIN_TARGET}-size)
+set(CMAKE_STRIP ${TOOLCHAIN_TARGET}-strip)
+
 set(CMAKE_CXX_FLAGS_DEBUG_INIT "-O0 -DDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE_INIT "-Os -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "-Os -g3 -DNDEBUG")
@@ -41,7 +48,7 @@ set(TOOLCHAIN_DATA_FLAGS
 	-fdata-sections 
 	#-fno-strict-aliasing
 	-fshort-enums #This option tells the compiler to allocate as many bytes as needed for enumerated types.
-	"-D__ASSERT_FUNC=((char*)0)" # Remove 'function name' from assert details to reduce binary size
+	#"-D__ASSERT_FUNC=((char*)0)" # Remove 'function name' from assert details to reduce binary size
 	#-fmacro-prefix-map={build.path}\sketch\=  #TODO: used on Ardunino custom BSP but not needed here?
 	#-fdebug-prefix-map={build.path}\sketch={build.source.path}   #TODO: used on Ardunino custom BSP but not needed here?
 )
