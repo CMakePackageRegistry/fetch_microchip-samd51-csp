@@ -75,7 +75,9 @@ SECTIONS
 
         . = ALIGN(4);
         _sfixed = .;
-        KEEP(*(.isr_vector .vectors .vectors.*))
+        _svectors = _sfixed;
+        KEEP(*(.vectors .vectors.*))
+        _evectors = .;
         
         /*. = ALIGN(4);*/
         PROVIDE(__origin_versionTag = .);
@@ -99,7 +101,6 @@ SECTIONS
     /****************************/
     .rodata :
     {
-        FILL(0x0)
         . = ALIGN(4);
         *(.rodata .rodata* .gnu.linkonce.r.*) /* .rodata* sections (constants, strings, etc.) */
         . = ALIGN(4);
@@ -107,7 +108,6 @@ SECTIONS
     
     .preinit_array :
     {
-        FILL(0x0)
         . = ALIGN(4);
         PROVIDE_HIDDEN (__preinit_array_start = .);
         KEEP (*(.preinit_array*))
@@ -117,7 +117,6 @@ SECTIONS
         
     .init_array :
     {
-        FILL(0x0)
         . = ALIGN(4);
         PROVIDE_HIDDEN (__init_array_start = .);
         KEEP (*(SORT(.init_array.*)))
@@ -128,7 +127,6 @@ SECTIONS
         
     .ctors :
     {
-        FILL(0x0)
         . = ALIGN(4);
         KEEP (*crtbegin.o(.ctors))
         KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
@@ -138,7 +136,6 @@ SECTIONS
     
     .fini_array :
     {    
-        FILL(0x0)
         . = ALIGN(4);
         __fini_array_start = .;
         KEEP (*(.fini_array))
@@ -148,14 +145,11 @@ SECTIONS
 
     .dtors :
     {
-        FILL(0x0)
-
         . = ALIGN(4);
         KEEP (*crtbegin.o(.dtors))
         KEEP (*(EXCLUDE_FILE (*crtend.o) .dtors))
         KEEP (*(SORT(.dtors.*)))
         KEEP (*crtend.o(.dtors))
-        . = ALIGN(4);
     } > TARGET_FLASH
         
     . = ALIGN(4);
@@ -304,6 +298,9 @@ SECTIONS
 
 
 /** TODO: Only valid for bootloader! ASSERT( __origin_versionTag == 0x24 + ORIGIN(TARGET_FLASH), "VersionTag address moved" )*/
+/** TODO: Only valid for Application! 
+ASSERT( __origin_versionTag == 0x264 + ORIGIN(TARGET_FLASH), "VersionTag address moved" ) */
+ASSERT( _evectors - _svectors >= 0x24, "vectors Not set!" )
 ASSERT( __origin_CALDATA_FLASH == 0x804020, "Factory Calibration Data address moved" )
 ASSERT( ORIGIN(HWDATA_FLASH) == 0x1FC0, "Hardware Data address moved" )
 ASSERT( ORIGIN(APP_FLASH) == __APP_OFFSET__, "App-Image address moved" )
