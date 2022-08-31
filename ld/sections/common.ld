@@ -79,7 +79,7 @@ SECTIONS
         
         /*. = ALIGN(4);*/
         PROVIDE(__origin_versionTag = .);
-		KEEP(*(.versionTag)) ;
+		KEEP(*(.versionTag .applicationFwVersionTag .applicationMetaData)) ;
 
         . = ALIGN(4);
          *(.text .text* .gnu.linkonce.t.*)  /* .text* sections (code) */
@@ -99,6 +99,7 @@ SECTIONS
     /****************************/
     .rodata :
     {
+        FILL(0x0)
         . = ALIGN(4);
         *(.rodata .rodata* .gnu.linkonce.r.*) /* .rodata* sections (constants, strings, etc.) */
         . = ALIGN(4);
@@ -106,6 +107,7 @@ SECTIONS
     
     .preinit_array :
     {
+        FILL(0x0)
         . = ALIGN(4);
         PROVIDE_HIDDEN (__preinit_array_start = .);
         KEEP (*(.preinit_array*))
@@ -115,6 +117,7 @@ SECTIONS
         
     .init_array :
     {
+        FILL(0x0)
         . = ALIGN(4);
         PROVIDE_HIDDEN (__init_array_start = .);
         KEEP (*(SORT(.init_array.*)))
@@ -125,6 +128,7 @@ SECTIONS
         
     .ctors :
     {
+        FILL(0x0)
         . = ALIGN(4);
         KEEP (*crtbegin.o(.ctors))
         KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
@@ -134,6 +138,7 @@ SECTIONS
     
     .fini_array :
     {    
+        FILL(0x0)
         . = ALIGN(4);
         __fini_array_start = .;
         KEEP (*(.fini_array))
@@ -143,18 +148,19 @@ SECTIONS
 
     .dtors :
     {
-        . = ALIGN(4);
+        FILL(0x0)
 
+        . = ALIGN(4);
         KEEP (*crtbegin.o(.dtors))
         KEEP (*(EXCLUDE_FILE (*crtend.o) .dtors))
         KEEP (*(SORT(.dtors.*)))
         KEEP (*crtend.o(.dtors))
+        . = ALIGN(4);
     } > TARGET_FLASH
         
     . = ALIGN(4);
     _efixed = .;            /* End of text section */
-
-    
+        
     .ARM.extab :
     {
         *(.ARM.extab* .gnu.linkonce.armextab.*)
