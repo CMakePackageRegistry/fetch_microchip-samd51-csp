@@ -65,73 +65,113 @@ SECTIONS
 
 		. = __BOOTLOADER_SIZE__;
 	} > BOOT_FLASH
-     
+ 
+    /****************************/
+    /*      PROGRAM CODE        */
+    /****************************/
     .text :
     {
         FILL(0xDEADC0DE)
 
         . = ALIGN(4);
         _sfixed = .;
-        KEEP(*(.vectors .vectors.*))
+        KEEP(*(.isr_vector .vectors .vectors.*))
         
-		. = ALIGN(4);
+        /*. = ALIGN(4);*/
         PROVIDE(__origin_versionTag = .);
 		KEEP(*(.versionTag)) ;
-		. = ALIGN(4);
-
-        *(.text .text.* .gnu.linkonce.t.*)
-        *(.glue_7t) *(.glue_7)
-        *(.rodata .rodata* .gnu.linkonce.r.*)
-        *(.ARM.extab* .gnu.linkonce.armextab.*)
-
-        /* Support C constructors, and C destructors in both user code
-           and the C library. This also provides support for C++ code. */
-        . = ALIGN(4);
-        KEEP(*(.init))
-        . = ALIGN(4);
-        __preinit_array_start = .;
-        KEEP (*(.preinit_array))
-        __preinit_array_end = .;
 
         . = ALIGN(4);
-        __init_array_start = .;
+         *(.text .text* .gnu.linkonce.t.*)  /* .text* sections (code) */
+        *(.glue_7 .glue_7t) /* glue_7= Glue ARM to Thumb code, glue_7t= Glue Thumb to ARM code */
+        *(.eh_frame)
+        
+        /* Note: The function ‘.text.Reset_Handler’ is one of the *(.text*) sections */
+        KEEP (*(.init))
+        KEEP (*(.fini))
+        
+        . = ALIGN(4);
+        _etext = .;        /* Define a global symbol at end of code */
+    } > TARGET_FLASH
+
+    /****************************/
+    /*      CONSTANT DATA       */
+    /****************************/
+    .rodata :
+    {
+        . = ALIGN(4);
+        *(.rodata .rodata* .gnu.linkonce.r.*) /* .rodata* sections (constants, strings, etc.) */
+        . = ALIGN(4);
+    } > TARGET_FLASH
+    
+    .preinit_array :
+    {
+        . = ALIGN(4);
+        PROVIDE_HIDDEN (__preinit_array_start = .);
+        KEEP (*(.preinit_array*))
+        PROVIDE_HIDDEN (__preinit_array_end = .);
+        . = ALIGN(4);
+    } > TARGET_FLASH
+        
+    .init_array :
+    {
+        . = ALIGN(4);
+        PROVIDE_HIDDEN (__init_array_start = .);
         KEEP (*(SORT(.init_array.*)))
-        KEEP (*(.init_array))
-        __init_array_end = .;
-
+        KEEP (*(.init_array*))
+        PROVIDE_HIDDEN (__init_array_end = .);
+        . = ALIGN(4);
+    } > TARGET_FLASH
+        
+    .ctors :
+    {
         . = ALIGN(4);
         KEEP (*crtbegin.o(.ctors))
         KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
         KEEP (*(SORT(.ctors.*)))
         KEEP (*crtend.o(.ctors))
-
-        . = ALIGN(4);
-        KEEP(*(.fini))
-
+    } > TARGET_FLASH
+    
+    .fini_array :
+    {    
         . = ALIGN(4);
         __fini_array_start = .;
         KEEP (*(.fini_array))
         KEEP (*(SORT(.fini_array.*)))
         __fini_array_end = .;
+    } > TARGET_FLASH
+
+    .dtors :
+    {
+        . = ALIGN(4);
 
         KEEP (*crtbegin.o(.dtors))
         KEEP (*(EXCLUDE_FILE (*crtend.o) .dtors))
         KEEP (*(SORT(.dtors.*)))
         KEEP (*crtend.o(.dtors))
-
-        . = ALIGN(4);
-        _efixed = .;            /* End of text section */
     } > TARGET_FLASH
+        
+    . = ALIGN(4);
+    _efixed = .;            /* End of text section */
 
+    
+    .ARM.extab :
+    {
+        *(.ARM.extab* .gnu.linkonce.armextab.*)
+    } > TARGET_FLASH
+        
     /* .ARM.exidx is sorted, so has to go in its own output section.  */
     PROVIDE_HIDDEN (__exidx_start = .);
-    .ARM.exidx :
-    {
-      *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-    } > TARGET_FLASH
+	.ARM.exidx :
+	{
+		*(.ARM.exidx* .gnu.linkonce.armexidx.*)
+	} > TARGET_FLASH
     PROVIDE_HIDDEN (__exidx_end = .);
 
-
+        
+	/* Location counter can end up 2byte aligned with narrow Thumb code but
+	   _etext is assumed by startup code to be the LMA of a section in RAM
+	   which must be 4byte aligned */	
     . = ALIGN(4);
     _etext = .;
           
@@ -141,17 +181,7 @@ SECTIONS
 		LONG( 0x0 );
 	} > TARGET_FLASH
 
-    .relocate : AT (_etext)
-    {
-        FILL(0xDEADBEEF)
 
-        . = ALIGN(4);
-        _srelocate = .;
-        *(.ramfunc .ramfunc.*);
-        *(.data .data.*);
-        . = ALIGN(4);
-        _erelocate = .;
-    } > RAM
 
     .bkupram (NOLOAD):
     {
@@ -172,21 +202,65 @@ SECTIONS
         _eqspi = .;
     } > qspi
     */
-
-    /* .bss section which is used for uninitialized data */
-    .bss (NOLOAD) :
+    
+    /****************************/
+    /*    INITIALIZED DATA      */
+    /****************************/
+    _sidata = LOADADDR(.data);
+    .data :
     {
+        FILL(0xDEADF00D)
+
         . = ALIGN(4);
-        _sbss = . ;
-        _szero = .;
-        *(.bss .bss.*)
+        _sdata = .;        /* create a global symbol at data start */
+        _srelocate = _sdata;
+
+        *(.ramfunc .ramfunc.*);
+        *(.data)           /* .data sections */
+        *(.data*)          /* .data* sections */
+
+        . = ALIGN(4);
+        _edata = .;        /* define a global symbol at data end */
+        _erelocate = _edata;
+
+    } > RAM AT > TARGET_FLASH
+
+    /****************************/
+    /*    UNINITIALIZED DATA    */
+    /****************************/
+    . = ALIGN(4);
+    .bss :
+    {
+        FILL(0xDEADBEEF)
+
+        _sbss = .;         /* define a global symbol at bss start */
+        __bss_start__ = _sbss;
+        _szero = _sbss;
+        *(.bss .bss*)
         *(COMMON)
+
         . = ALIGN(4);
-        _ebss = . ;
-        _ezero = .;
-        end = .;
+        _ebss = .;         /* define a global symbol at bss end */
+        __bss_end__ = _ebss;
+        _ezero = _ebss;
+        end = _ebss;
     } > RAM
-  
+
+     /****************************/
+    /* USER_HEAP_STACK SECTION  */
+    /****************************/
+    /* User_heap_stack section, used to check that there is enough RAM left */
+    ._user_heap_stack :
+    {
+        . = ALIGN(8);
+        PROVIDE ( end = . );
+        PROVIDE ( _end = . );
+        /*.TODO: 
+        = . + _Min_Heap_Size;
+        . = . + _Min_Stack_Size;
+        */
+        . = ALIGN(8);
+    } > RAM
     
 	/* .stack_dummy section doesn't contains any symbols. It is only
 	 * used for linker to calculate size of stack sections, and assign
@@ -202,10 +276,9 @@ SECTIONS
     
     /** We place resetMagic at the very end of memory i.e. Before the stack
     */
-    __RAM_reset_magic__ = __end_RAM - 4;
-    .resetMagic __RAM_reset_magic__ (NOLOAD) :
+    . = __end_RAM - SIZEOF(.resetMagic);
+    .resetMagic (NOLOAD) :
     {
-        . = ALIGN(4);
         KEEP(*(.resetMagic)) ;
     } > RAM
     
@@ -213,13 +286,13 @@ SECTIONS
 	 * size of stack_dummy section */
 	_estack = __end_RAM - SIZEOF(.resetMagic);
 	_sstack = _estack - SIZEOF(.stack_dummy);
-	PROVIDE(__stack = _estack);  
+    PROVIDE(__stack = _estack);  
 
     . = ALIGN(4);
     _end = . ;
 
 	/* Image size of flashed image TODO: May be a betetr way to determine this? */
-	__imageSizeBytes = (_etext - ORIGIN(TARGET_FLASH)) + SIZEOF(.relocate);
+	__imageSizeBytes = (_etext - ORIGIN(TARGET_FLASH)) + SIZEOF(.data);
 
 }
 

@@ -20,21 +20,13 @@ set(CMAKE_READELF ${TOOLCHAIN_TARGET}-readelf)
 set(CMAKE_SIZE ${TOOLCHAIN_TARGET}-size)
 set(CMAKE_STRIP ${TOOLCHAIN_TARGET}-strip)
 
-set(CMAKE_CXX_FLAGS_DEBUG_INIT "-O0 -DDEBUG")
-set(CMAKE_CXX_FLAGS_RELEASE_INIT "-Os -DNDEBUG")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "-Os -g3 -DNDEBUG")
-
-set(CMAKE_CXX_FLAGS_DEBUG_INIT "-O0 -DDEBUG")
-set(CMAKE_CXX_FLAGS_RELEASE_INIT "-Os -DNDEBUG")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT "-Os -g3 -DNDEBUG")
-
-
 function( setLangFlagsInit lang )
-set(CMAKE_${lang}_FLAGS_DEBUG " -g -DDEBUG" CACHE STRING "")
-set(CMAKE_${lang}_FLAGS_MINSIZEREL " -Os -DNDEBUG" CACHE STRING "")
-set(CMAKE_${lang}_FLAGS_RELEASE " -O3 -DNDEBUG" CACHE STRING "")
-set(CMAKE_${lang}_FLAGS_RELWITHDEBINFO " -O2 -g -DNDEBUG" CACHE STRING "")
+	set(CMAKE_${lang}_FLAGS_DEBUG " -g -Og -DDEBUG" CACHE STRING "")
+	set(CMAKE_${lang}_FLAGS_MINSIZEREL " -Os -DNDEBUG" CACHE STRING "")
+	set(CMAKE_${lang}_FLAGS_RELEASE " -O3 -DNDEBUG" CACHE STRING "")
+	set(CMAKE_${lang}_FLAGS_RELWITHDEBINFO " -O2 -g -DNDEBUG" CACHE STRING "")
 endfunction()
+
 setLangFlagsInit("C")
 setLangFlagsInit("ASM")
 setLangFlagsInit("CXX")
@@ -42,11 +34,20 @@ setLangFlagsInit("CXX")
 #set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 # Assembler flags common to all targets
-set(TOOLCHAIN_COMMON_FLAGS ) #-MP -MD -O3 -g3  -D__HEAP_SIZE=8192 -D__STACK_SIZE=8192
+set(TOOLCHAIN_COMMON_FLAGS 
+	-pipe # Avoid temporary files, speeding up builds
+	#-grecord-gcc-switches # Store compiler flags in debugging information
+) #-MP -MD -O3 -g3  -D__HEAP_SIZE=8192 -D__STACK_SIZE=8192
+
 set(TOOLCHAIN_DATA_FLAGS 
 	-ffunction-sections 
-	-fdata-sections 
+	-fdata-sections
 	#-fno-strict-aliasing
+	# -fpie -Wl,-pie # Full ASLR (Address space layout randomization) security addition for executables
+	# -fstack-clash-protection # Increased reliability of stack overflow detection
+	# -fstack-protector or -fstack-protector-all # -fstack-protector or -fstack-protector-all
+	#-fasynchronous-unwind-tables # @todo Increased reliability of backtraces
+
 	-fshort-enums #This option tells the compiler to allocate as many bytes as needed for enumerated types.
 	#"-D__ASSERT_FUNC=((char*)0)" # Remove 'function name' from assert details to reduce binary size
 	#-fmacro-prefix-map={build.path}\sketch\=  #TODO: used on Ardunino custom BSP but not needed here?
@@ -54,6 +55,7 @@ set(TOOLCHAIN_DATA_FLAGS
 )
 set(TOOLCHAIN_WARN_FLAGS 
 	-Wall
+	-Werror=format-security # Reject potentially unsafe format string arguents
 	# -Wextra -Wno-attributes -Wno-format @TODO  -Werror
 ) 
 
@@ -98,7 +100,8 @@ SET(CMAKE_CXX_FLAGS
 SET(CMAKE_EXE_LINKER_FLAGS  
 	#-v
 	${TOOLCHAIN_ARCH_FLAGS}
-	-Wl,--print-memory-usage,-Map=memory.map -Wl,--start-group -lm -Wl,--end-group
+	-Wl,--print-memory-usage,-Map=memory.map#,--print-gc-sections 
+	-Wl,--start-group -lm -Wl,--end-group # Relink 'm' to resolve symbosl recursively @TODO potentially slower link times
 	-Wl,--gc-sections,--check-sections,--unresolved-symbols=report-all
 	-Wl,--warn-common,--warn-section-align
 	-specs=nosys.specs -specs=nano.specs
