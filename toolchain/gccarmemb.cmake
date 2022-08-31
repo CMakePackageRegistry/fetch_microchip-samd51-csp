@@ -102,7 +102,8 @@ SET(CMAKE_EXE_LINKER_FLAGS
 	${TOOLCHAIN_ARCH_FLAGS}
 	-Wl,--print-memory-usage,-Map=memory.map#,--print-gc-sections 
 	-Wl,--start-group -lm -Wl,--end-group # Relink 'm' to resolve symbosl recursively @TODO potentially slower link times
-	-Wl,--gc-sections,--check-sections,--unresolved-symbols=report-all
+	-Wl,--check-sections,--unresolved-symbols=report-all 
+	 -Wl,--gc-sections
 	-Wl,--warn-common,--warn-section-align
 	-specs=nosys.specs -specs=nano.specs
 	-Xlinker --defsym=__BOOTPROTECT_SIZE__=8K
