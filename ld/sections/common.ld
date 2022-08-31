@@ -297,9 +297,12 @@ SECTIONS
 }
 
 
-/** TODO: Only valid for bootloader! ASSERT( __origin_versionTag == 0x24 + ORIGIN(TARGET_FLASH), "VersionTag address moved" )*/
-/** TODO: Only valid for Application! ASSERT( __origin_versionTag == 0x264 + ORIGIN(TARGET_FLASH), "VersionTag address moved" ) */
-ASSERT( _evectors - _svectors >= 0x24, "vectors Not set!" )
+/** TODO: Only valid for bootloader! */
+/* ASSERT( __origin_versionTag == 0x24 + ORIGIN(TARGET_FLASH), "VersionTag address moved" ) */
+/** TODO: Only valid for Application with full .vectors table!*/
+ASSERT( __origin_versionTag == 0x264 + ORIGIN(TARGET_FLASH), "VersionTag address moved" )
+
+ASSERT( _evectors - _svectors >= 0x24, "vectors Not set!" ) 
 ASSERT( __origin_CALDATA_FLASH == 0x804020, "Factory Calibration Data address moved" )
 ASSERT( ORIGIN(HWDATA_FLASH) == 0x1FC0, "Hardware Data address moved" )
 ASSERT( ORIGIN(APP_FLASH) == __APP_OFFSET__, "App-Image address moved" )
