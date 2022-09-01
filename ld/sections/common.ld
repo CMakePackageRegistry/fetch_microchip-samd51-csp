@@ -262,24 +262,23 @@ SECTIONS
     } > RAM
     */
     
+
 	/* .stack_dummy section doesn't contains any symbols. It is only
 	 * used for linker to calculate size of stack sections, and assign
 	 * values to stack symbols later */
 	.stack_dummy (COPY):
 	{
-        . = ALIGN(8);
-        _sstack = .;
-		*(.stack*)
-        . = ALIGN(8);
-        _estack = .;
+		KEEP(*(.stack*))
 	} > RAM
     
     /** We place resetMagic at the very end of memory i.e. Before the stack
     */
-    . = __end_RAM - SIZEOF(.resetMagic);
-    .resetMagic (NOLOAD) :
+    __RAM_reset_magic__ = __end_RAM - 4;    
+    .resetMagic __RAM_reset_magic__ (NOLOAD) :
     {
+        _sresetMagic = .;
         KEEP(*(.resetMagic)) ;
+        _eresetMagic = .;
     } > RAM
     
 	/* Set stack top to end of RAM, and stack limit move down by
@@ -287,7 +286,7 @@ SECTIONS
 	_estack = __end_RAM - SIZEOF(.resetMagic);
 	_sstack = _estack - SIZEOF(.stack_dummy);
     PROVIDE(__stack = _estack);  
-
+    
     . = ALIGN(4);
     _end = . ;
 
@@ -306,4 +305,6 @@ ASSERT( _evectors - _svectors >= 0x24, "vectors Not set!" )
 ASSERT( __origin_CALDATA_FLASH == 0x804020, "Factory Calibration Data address moved" )
 ASSERT( ORIGIN(HWDATA_FLASH) == 0x1FC0, "Hardware Data address moved" )
 ASSERT( ORIGIN(APP_FLASH) == __APP_OFFSET__, "App-Image address moved" )
-ASSERT(SIZEOF(.resetMagic) >= 4, "resetMagic Not used" )
+ASSERT( SIZEOF(.resetMagic) == 4, "resetMagic shall be 4 bytes" )
+ASSERT( _eresetMagic == __end_RAM, "resetMagic not at __end_RAM-4" )
+
