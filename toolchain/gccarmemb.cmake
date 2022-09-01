@@ -42,7 +42,7 @@ set(TOOLCHAIN_COMMON_FLAGS
 set(TOOLCHAIN_DATA_FLAGS 
 	-ffunction-sections 
 	-fdata-sections
-	#-fno-strict-aliasing
+	-fno-strict-aliasing # TODO: "note: code may be misoptimized unless '-fno-strict-aliasing' is used"
 	# -fpie -Wl,-pie # Full ASLR (Address space layout randomization) security addition for executables
 	# -fstack-clash-protection # Increased reliability of stack overflow detection
 	# -fstack-protector or -fstack-protector-all # -fstack-protector or -fstack-protector-all
@@ -100,10 +100,11 @@ SET(CMAKE_CXX_FLAGS
 SET(CMAKE_EXE_LINKER_FLAGS  
 	#-v
 	${TOOLCHAIN_ARCH_FLAGS}
+	# -Wl,-z,norelro # TODO: ignored?
 	-Wl,--print-memory-usage,-Map=memory.map#,--print-gc-sections 
 	-Wl,--start-group -lm -Wl,--end-group # Relink 'm' to resolve symbosl recursively @TODO potentially slower link times
 	-Wl,--check-sections,--unresolved-symbols=report-all 
-	 -Wl,--gc-sections
+	-Wl,--gc-sections
 	-Wl,--warn-common,--warn-section-align
 	-specs=nosys.specs -specs=nano.specs
 	-Xlinker --defsym=__BOOTPROTECT_SIZE__=8K

@@ -180,9 +180,7 @@ SECTIONS
 		LONG( __imageSizeBytes );
 		LONG( 0x0 );
 	} > TARGET_FLASH
-
-
-
+        
     .bkupram (NOLOAD):
     {
         . = ALIGN(8);
@@ -206,15 +204,15 @@ SECTIONS
     /****************************/
     /*    INITIALIZED DATA      */
     /****************************/
-    _sidata = LOADADDR(.data);
-    .data :
+    _sidata = LOADADDR(.relocate);
+    .relocate :  AT (_etext)
     {
         FILL(0xDEADF00D)
 
         . = ALIGN(4);
         _sdata = .;        /* create a global symbol at data start */
         _srelocate = _sdata;
-
+        
         *(.ramfunc .ramfunc.*);
         *(.data)           /* .data sections */
         *(.data*)          /* .data* sections */
@@ -223,16 +221,17 @@ SECTIONS
         _edata = .;        /* define a global symbol at data end */
         _erelocate = _edata;
 
-    } > RAM AT > TARGET_FLASH
+    } > RAM 
+    /*AT > TARGET_FLASH*/
 
     /****************************/
     /*    UNINITIALIZED DATA    */
     /****************************/
-    . = ALIGN(4);
-    .bss :
+    .bss (NOLOAD) :
     {
         FILL(0xDEADBEEF)
 
+        . = ALIGN(4);
         _sbss = .;         /* define a global symbol at bss start */
         __bss_start__ = _sbss;
         _szero = _sbss;
@@ -250,17 +249,18 @@ SECTIONS
     /* USER_HEAP_STACK SECTION  */
     /****************************/
     /* User_heap_stack section, used to check that there is enough RAM left */
-    ._user_heap_stack :
+   /* TODO:
+   ._user_heap_stack :
     {
         . = ALIGN(8);
         PROVIDE ( end = . );
         PROVIDE ( _end = . );
-        /*.TODO: 
-        = . + _Min_Heap_Size;
+        . = . + _Min_Heap_Size;
         . = . + _Min_Stack_Size;
-        */
+        
         . = ALIGN(8);
     } > RAM
+    */
     
 	/* .stack_dummy section doesn't contains any symbols. It is only
 	 * used for linker to calculate size of stack sections, and assign
@@ -292,7 +292,7 @@ SECTIONS
     _end = . ;
 
 	/* Image size of flashed image TODO: May be a betetr way to determine this? */
-	__imageSizeBytes = (_etext - ORIGIN(TARGET_FLASH)) + SIZEOF(.data);
+	__imageSizeBytes = (_etext - ORIGIN(TARGET_FLASH)) + SIZEOF(.relocate);
 
 }
 
