@@ -17,8 +17,8 @@ set(SAMD51HeaderVersion "1" CACHE STRING "Samd51 DFP Header-API revision where v
 if( ${SAMD51HeaderVersion} EQUAL 2)
     FetchContent_Declare(
         samd51-csp
-        URL https://packs.download.microchip.com/Microchip.SAMD51_DFP.3.4.91.atpack
-        URL_HASH       SHA256=321150D1EEF152D95070B6D7129A7133DE1E2CEE2C20BFC8520A70A70DA76290
+        URL https://packs.download.microchip.com/Microchip.SAMD51_DFP.3.6.120.atpack
+        URL_HASH       SHA256=0fce096695dbd34914804dfb76a049db341097a169b1b8de6eac98b04faded8a
     )
 else()
     FetchContent_Declare(
