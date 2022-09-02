@@ -80,8 +80,9 @@ SECTIONS
         _evectors = .;
         
         /*. = ALIGN(4);*/
-        PROVIDE(__origin_versionTag = .);
+        PROVIDE(__sversionTag = .);
 		KEEP(*(.versionTag .applicationFwVersionTag .applicationMetaData)) ;
+        PROVIDE(__eversionTag = .);
 
         . = ALIGN(4);
          *(.text .text* .gnu.linkonce.t.*)  /* .text* sections (code) */
@@ -297,9 +298,12 @@ SECTIONS
 
 
 /** TODO: Only valid for bootloader! */
-/* ASSERT( __origin_versionTag == 0x24 + ORIGIN(TARGET_FLASH), "VersionTag address moved" ) */
+/* ASSERT( __sversionTag == 0x24 + ORIGIN(TARGET_FLASH), "VersionTag address moved" ) */
 /** TODO: Only valid for Application with full .vectors table!*/
-ASSERT( __origin_versionTag == 0x264 + ORIGIN(TARGET_FLASH), "VersionTag address moved" )
+ASSERT( __sversionTag == 0x264 + ORIGIN(TARGET_FLASH), "VersionTag address moved" )
+/* 
+ASSERT( __eversionTag - __sversionTag > 4, "VersionTag is not set" )
+*/
 
 ASSERT( _evectors - _svectors >= 0x24, "vectors Not set!" ) 
 ASSERT( __origin_CALDATA_FLASH == 0x804020, "Factory Calibration Data address moved" )
