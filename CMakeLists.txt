@@ -10,11 +10,11 @@ endif()
 
 include(FetchContent)
 
-set(SAMD51HeaderVersion "1" CACHE STRING "Samd51 DFP Header-API revision where v1 headers are Atmel format add_compile_definitions v2 are Microchip" )
+set(MCU_SAM_HeaderVersion "1" CACHE STRING "Samd51 DFP Header-API revision where v1 headers are Atmel format add_compile_definitions v2 are Microchip" )
 
 # TODO: Latest version AtmelStudio uses is Atmel.SAMD51_DFP.1.2.139.atpack
 
-if( ${SAMD51HeaderVersion} EQUAL 2)
+if( ${MCU_SAM_HeaderVersion} EQUAL 2)
     FetchContent_Declare(
         samd51-csp
         URL https://packs.download.microchip.com/Microchip.SAMD51_DFP.3.6.120.atpack
