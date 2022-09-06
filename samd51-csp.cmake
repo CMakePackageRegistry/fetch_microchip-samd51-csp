@@ -3,9 +3,9 @@ cmake_minimum_required(VERSION 3.18)
 
 project( microchip-samd51-csp LANGUAGES  C ASM)
 
-# MCU can be any of: samd51g19a,samd51j18a,samd51j19a,samd51j20a,samd51n19a,samd51n20a,samd51p19a,samd51p20a
-set(MCU "samd51j19a" CACHE STRING "samd51::csp MCU to build against")
-set_property(CACHE MCU PROPERTY STRINGS 
+# MCU_ID can be any of: samd51g19a,samd51j18a,samd51j19a,samd51j20a,samd51n19a,samd51n20a,samd51p19a,samd51p20a
+set(MCU_ID "samd51j19a" CACHE STRING "samd51::csp MCU_ID to build against")
+set_property(CACHE MCU_ID PROPERTY STRINGS 
     samd51g18a 
     samd51g19a 
     samd51j18a 
@@ -16,32 +16,33 @@ set_property(CACHE MCU PROPERTY STRINGS
     samd51p19a
     samd51p20a )
 
-set(MCURunsFrom "flash" CACHE STRING "Atmel Samd51 MCU executes from flash or sram")
-set_property(CACHE MCURunsFrom PROPERTY STRINGS 
+set(MCU_RunsFrom "flash" CACHE STRING "Atmel Samd51 Mcu executes from flash or sram")
+# @TODO: Add Vector+ISR from RAM option
+set_property(CACHE MCU_RunsFrom PROPERTY STRINGS 
     flash 
     sram
 )
 
-set(MCUFlashPartition "app" CACHE STRING "Atmel Samd51 MCU flash storage partition from boot (0x0) or app (0x2000)")
-set_property(CACHE MCUFlashPartition PROPERTY STRINGS 
+set(MCU_FlashPartition "app" CACHE STRING "Atmel Samd51 MCU flash storage partition from boot (0x0) or app (0x2000)")
+set_property(CACHE MCU_FlashPartition PROPERTY STRINGS 
     app
     boot 
 )
 
-string( TOUPPER ${MCU} MCU_UPPERCASE)
+string( TOUPPER ${MCU_ID} MCU_UPPERCASE)
 
 set( samd51-csp_GCC_LD  
-    ${CMAKE_CURRENT_LIST_DIR}/ld/${MCU}_${MCUFlashPartition}_${MCURunsFrom}.ld
-    # DFP = $<$<CXX_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/samd51a/gcc/gcc/${MCU}_${MCURunsFrom}.ld
+    ${CMAKE_CURRENT_LIST_DIR}/ld/${MCU_ID}_${MCU_FlashPartition}_${MCU_RunsFrom}.ld
+    # DFP = $<$<CXX_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/samd51a/gcc/gcc/${MCU_ID}_${MCU_RunsFrom}.ld
 )
 
 ## Add all LD files to project source for development
 set( samd51-csp_GCC_LD_SOURCES 
     ${samd51-csp_GCC_LD}
     ${CMAKE_CURRENT_LIST_DIR}/ld/memory/common.ld
-    ${CMAKE_CURRENT_LIST_DIR}/ld/memory/${MCU}.ld
+    ${CMAKE_CURRENT_LIST_DIR}/ld/memory/${MCU_ID}.ld
     ${CMAKE_CURRENT_LIST_DIR}/ld/sections/common.ld
-    ${CMAKE_CURRENT_LIST_DIR}/ld/sections/${MCUFlashPartition}.ld
+    ${CMAKE_CURRENT_LIST_DIR}/ld/sections/${MCU_FlashPartition}.ld
 )
 
 add_library(microchip-samd51-csp)
@@ -62,6 +63,13 @@ target_compile_definitions(microchip-samd51-csp
 )
 message( INFO "Targetting ${MCU_UPPERCASE}")
 
+set(MCU_Cmake ${CMAKE_CURRENT_LIST_DIR}/${MCU_ID}.cmake CACHE STRING "MCU specific Cmake file" )
+if ( EXISTS ${MCU_Cmake} )
+    include(${MCU_Cmake})
+else()
+    message( WARN " - No MCU specific cmake source file: ${MCU_Cmake}")
+endif()
+
 target_include_directories( microchip-samd51-csp
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/samd51a/include
@@ -74,8 +82,8 @@ endif()
 
 target_sources( microchip-samd51-csp 
     PUBLIC
-         $<$<CXX_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/samd51a/gcc/system_$<IF:$<EQUAL:${SAMD51HeaderVersion},2>,${MCU},samd51>.c>
-         $<$<CXX_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/samd51a/gcc/gcc/startup_$<IF:$<EQUAL:${SAMD51HeaderVersion},2>,${MCU},samd51>.c>
+         $<$<CXX_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/samd51a/gcc/system_$<IF:$<EQUAL:${MCU_SAM_HeaderVersion},2>,${MCU_ID},samd51>.c>
+         $<$<CXX_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/samd51a/gcc/gcc/startup_$<IF:$<EQUAL:${MCU_SAM_HeaderVersion},2>,${MCU_ID},samd51>.c>
          $<$<CXX_COMPILER_ID:GNU>:${samd51-csp_GCC_LD_SOURCES}>
 )
 
