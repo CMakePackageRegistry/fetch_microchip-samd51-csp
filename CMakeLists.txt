@@ -33,11 +33,8 @@ CPMAddPackage(
 )
 
 if(microchip-samd51-dfp_ADDED)
-
     # Inject and use samd51-csp.cmake 
-    # TODO; This isn't the best option for CPM!?
     write_file( ${microchip-samd51-dfp_SOURCE_DIR}/CMakeLists.txt "include(${CMAKE_CURRENT_LIST_DIR}/samd51-csp.cmake)" )
-
     add_subdirectory(${microchip-samd51-dfp_SOURCE_DIR} ${microchip-samd51-dfp_BINARY_DIR})
 endif()
     
