@@ -30,11 +30,12 @@ CPMAddPackage(
     NAME microchip-samd51-dfp
     URL ${URL}
     URL_HASH ${URL_HASH}
+    DOWNLOAD_ONLY YES
 )
 
 if(microchip-samd51-dfp_ADDED)
     # Inject and use samd51-csp.cmake 
     write_file( ${microchip-samd51-dfp_SOURCE_DIR}/CMakeLists.txt "include(${CMAKE_CURRENT_LIST_DIR}/samd51-csp.cmake)" )
-    add_subdirectory(${microchip-samd51-dfp_SOURCE_DIR} ${microchip-samd51-dfp_BINARY_DIR})
+    add_subdirectory(${microchip-samd51-dfp_SOURCE_DIR}/ ${microchip-samd51-dfp_BINARY_DIR}/)
 endif()
     
