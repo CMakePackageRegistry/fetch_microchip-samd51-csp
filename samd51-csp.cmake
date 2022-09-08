@@ -87,6 +87,9 @@ target_sources( microchip-samd51-csp
          $<$<CXX_COMPILER_ID:GNU>:${samd51-csp_GCC_LD_SOURCES}>
 )
 
+include(CPM)
+CPMAddPackage("gh:CMakeFetchContent/arm-cmsis_5#develop")
+
 target_link_libraries( microchip-samd51-csp
     PUBLIC
         arm::cmsis_5
