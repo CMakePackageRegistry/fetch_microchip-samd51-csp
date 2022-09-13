@@ -31,14 +31,14 @@ set_property(CACHE MCU_FlashPartition PROPERTY STRINGS
 
 string( TOUPPER ${MCU_ID} MCU_UPPERCASE)
 
-set( samd51-csp_GCC_LD  
+set( microchip-samd51-csp_GCC_LD  
     ${CMAKE_CURRENT_LIST_DIR}/ld/${MCU_ID}_${MCU_FlashPartition}_${MCU_RunsFrom}.ld
     # DFP = $<$<CXX_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/samd51a/gcc/gcc/${MCU_ID}_${MCU_RunsFrom}.ld
 )
 
 ## Add all LD files to project source for development
-set( samd51-csp_GCC_LD_SOURCES 
-    ${samd51-csp_GCC_LD}
+set( microchip-samd51-csp_GCC_LD_SOURCES 
+    ${microchip-samd51-csp_GCC_LD}
     ${CMAKE_CURRENT_LIST_DIR}/ld/memory/common.ld
     ${CMAKE_CURRENT_LIST_DIR}/ld/memory/${MCU_ID}.ld
     ${CMAKE_CURRENT_LIST_DIR}/ld/sections/common.ld
@@ -53,7 +53,7 @@ set_target_properties( microchip-samd51-csp PROPERTIES
 # TODO: doens't appear to cause rebuild as expected to :S'
 set_property(TARGET microchip-samd51-csp PROPERTY 
     INTERFACE_LINK_DEPENDS  
-    ${samd51-csp_GCC_LD_SOURCES}
+    ${microchip-samd51-csp_GCC_LD_SOURCES}
 )
 
 target_compile_definitions(microchip-samd51-csp
@@ -81,10 +81,10 @@ endif()
 
 
 target_sources( microchip-samd51-csp 
-    PUBLIC
+    PRIVATE
          $<$<CXX_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/samd51a/gcc/system_$<IF:$<EQUAL:${MCU_SAM_HeaderVersion},2>,${MCU_ID},samd51>.c>
          $<$<CXX_COMPILER_ID:GNU>:${CMAKE_CURRENT_SOURCE_DIR}/samd51a/gcc/gcc/startup_$<IF:$<EQUAL:${MCU_SAM_HeaderVersion},2>,${MCU_ID},samd51>.c>
-         $<$<CXX_COMPILER_ID:GNU>:${samd51-csp_GCC_LD_SOURCES}>
+         $<$<CXX_COMPILER_ID:GNU>:${microchip-samd51-csp_GCC_LD_SOURCES}>
 )
 
 include(CPM)
@@ -98,7 +98,7 @@ target_link_libraries( microchip-samd51-csp
 target_link_options( microchip-samd51-csp  PUBLIC 
 	$<$<CXX_COMPILER_ID:GNU>:-L${CMAKE_CURRENT_SOURCE_DIR}/samd51a/gcc/gcc/>
 	$<$<CXX_COMPILER_ID:GNU>:-L${CMAKE_CURRENT_LIST_DIR}/ld/>
-    $<$<CXX_COMPILER_ID:GNU>:-T${samd51-csp_GCC_LD}>
+    $<$<CXX_COMPILER_ID:GNU>:-T${microchip-samd51-csp_GCC_LD}>
 )
 
 # TODO: Using |Toolchain as these settings only inheritted by dependent libraries
