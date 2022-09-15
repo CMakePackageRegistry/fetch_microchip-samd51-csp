@@ -88,7 +88,7 @@ target_sources( microchip-samd51-csp
 )
 
 include(CPM)
-CPMAddPackage("gh:CMakeFetchContent/arm-cmsis_5#develop")
+CPMAddPackage("gh:CMakeFetchContent/fetch_arm-cmsis_5#develop")
 
 target_link_libraries( microchip-samd51-csp
     PUBLIC
